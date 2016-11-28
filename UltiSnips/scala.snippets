@@ -1,0 +1,29 @@
+snippet trans "Wrap in transaction"
+Database.transaction { implicit txn =>
+  ${VISUAL:transaction}
+}.unsafePerformIO
+endsnippet
+
+snippet ot "Wrap type into option" w
+Option[${VISUAL:type}]
+endsnippet
+
+snippet actor "Define an actor with a companion object"
+class ${1:ActorName} extends Actor with ActorLogging {
+	override def receive: Receive = {
+		case _ => "default"
+	}
+}
+
+object $1 {
+	def props = Props(new $1)
+}
+endsnippet
+
+snippet package "Add package based on current directory"
+package `!v substitute(substitute(expand("%:p:h"), getcwd() . "/src/main/scala/", "", ""), "/", ".", "g")`
+endsnippet
+
+snippet cc "Create case class"
+final case class ${1:ClassName}(${2:param})
+endsnippet

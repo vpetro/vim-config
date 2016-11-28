@@ -1,0 +1,66 @@
+snippet uuid "UUID" !b
+`!p import uuid
+if not snip.c:
+    snip.rv = uuid.uuid4().hex`
+endsnippet
+
+snippet astl "assertTrue" !b
+self.assertTrue(
+    ${1:value}
+)
+
+endsnippet
+
+snippet ast "assertTrue" !b
+self.assertTrue(${1:value})
+endsnippet
+
+snippet ase "assertEquals" !b
+self.assertEquals(
+    ${1:FIRST},
+    ${2:SECOND}
+)
+endsnippet
+
+snippet asi "assert isinstance" !b
+self.assertTrue(
+    isinstance(${1:FIRST}, ${2:SECOND})
+)
+endsnippet
+
+snippet fore "for enumerate" !b
+for i, ${1:param_name} in enumerate(${2:iterable}):
+    ${3:expression}
+endsnippet
+
+snippet formp "for master_product" !b
+for master_product in masters:
+    mps = dict((mp['store'], mp) for mp in master_product])
+endsnippet
+
+
+global !p
+def complete(t, opts):
+    if t:
+        opts = [m[len(t):] for m in opts if m.startswith(t)]
+    if len(opts) == 1:
+        return "%s" % opts[0]
+    return "|".join(opts)
+endglobal
+
+snippet 'f' "mongo find" r
+db.$1`!p snip.rv=complete(t[1], ['products', 'masters', 'categories', 'brands', 'lists'])`.find({${2:QUERY}}, {${3:FILTER}})
+endsnippet
+
+snippet 'fo' "mongo find_one" r
+db.$1`!p snip.rv=complete(t[1], ['prodlists', 'products', 'masters', 'categories', 'brands', 'lists'])`.find_one({${2:QUERY}})
+endsnippet
+
+snippet fra "rp add argument" !b
+rp.add_argument('${1:param_name}', type=${2:type})
+endsnippet
+
+snippet ndb "debug nosetests"
+from nose.tools import set_trace
+set_trace()
+endsnippet
