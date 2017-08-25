@@ -22,6 +22,7 @@ nmap \ee :EnsimeConnect<cr>
 nmap \ea :EnsimeTypecheckAll<cr>
 nmap \ef :EnsimeTypecheckFile<cr>
 nmap \et :EnsimeTypeAtPoint<cr>
+vmap \et :<C-U>EnsimeTypeOfSelection<cr>
 nmap \ed :EnsimeSymbolAtPoint<cr>
 nmap \eu :EnsimeUsesOfSymbolAtPoint<cr>
 
@@ -60,11 +61,16 @@ function! StartREPL()
 endfunction
 
 function! StopREPL()
-    if exists("g:repl_terminal_id")
-        call jobstop(g:repl_terminal_id)
-        unlet g:repl_terminal_id
-        execute 'bwipeout! ' . g:repl_buffer_name
-        unlet g:repl_buffer_name
+    if exists("g:repl_terminal_id") 
+        if jobpid(g:repl_terminal_id) != 0
+            call jobstop(g:repl_terminal_id)
+            unlet g:repl_terminal_id
+            execute 'bwipeout! ' . g:repl_buffer_name
+            unlet g:repl_buffer_name
+        else
+            unlet g:repl_terminal_id
+            unlet g:repl_buffer_name
+        endif
     endif
 endfunction
 
