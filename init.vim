@@ -314,3 +314,5 @@ nnoremap <leader>o :call ToggleMaximixed()<cr>
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+
+au BufEnter * if &buftype == 'terminal' | :startinsert | endif
