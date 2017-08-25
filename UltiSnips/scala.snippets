@@ -1,3 +1,10 @@
+snippet cls "class"
+class ${1:ClassName}() {
+	${2:Body}
+}
+$3
+endsnippet
+
 snippet trans "Wrap in transaction"
 Database.transaction { implicit txn =>
   ${VISUAL:transaction}
@@ -26,4 +33,56 @@ endsnippet
 
 snippet cc "Create case class"
 final case class ${1:ClassName}(${2:param})
+endsnippet
+
+snippet ct "Create test class"
+class ${1:Name}Test extends FunSuite {
+	${2}
+}
+endsnippet
+
+snippet mt "Create test method"
+test("${1:name}") {
+	${2:body}
+}
+
+snippet vl "create value"
+val $1: $2 = $3
+endsnippet
+
+snippet fut "Future"
+Future { $1}
+endsnippet
+
+snippet futs "Future.successful"
+Future.successful($1)
+endsnippet
+
+snippet futi "Future imports"
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+endsnippet
+
+snippet vv "Vector"
+val $1: Vector[$2] = Vector($3)
+endsnippet
+
+snippet vm "Map"
+val $1: Map[$2, $3] = Map($4)
+endsnippet
+
+snippet vmis "Map[String, Int]"
+val $1: Map[String, Int] = Map($2)
+endsnippet
+
+snippet vmd "Map with default"
+val $1: Map[String, Int] = new Map.WithDefault(
+	Map("a" -> 0), (x: String) => -1
+)
+endsnippet
+
+snippet main "Create main function"
+def main(args: Array[String]): Unit = {
+	${1:body}
+}
 endsnippet
