@@ -11,6 +11,7 @@ filetype plugin indent on
 set t_Co=256
 set hidden
 set nolazyredraw
+" set termguicolors
 " }
 
 " indenting {
@@ -56,11 +57,8 @@ tnoremap <C-h> <C-\><C-n><C-w>h
 tnoremap <C-j> <C-\><C-n><C-w>j
 tnoremap <C-k> <C-\><C-n><C-w>k
 tnoremap <C-l> <C-\><C-n><C-w>l
+tnoremap <C-]> <C-\><C-n>
 
-nmap <leader>f :ToggleTerminalBuffer<cr>
-tnoremap <leader>f <c-\><c-n>:ToggleTerminalBuffer<cr>
-
-nnoremap <leader>o :call ToggleMaximixed()<cr>
 
 " equalize the windows when vim is resized
 autocmd VimResized * :wincmd =
@@ -79,7 +77,8 @@ set history=1000
 
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc,.cmi,.cmo,.cmx,.cmxa,.exe,.ho,.hi,.bc,.out,.annot,.spot
 set wildmenu
-set wildignore+=*/.hg/*,*/.svn/*,*/bin/*,*/images/*
+"set wildignore+=*/.hg/*,*/.svn/*,*/bin/*,*/images/*
+set wildignore+=*/.hg/*,*/.svn/*,*/images/* " temp fix for fzf
 set wildignore+=*/target/*,*/.idea/*
 set wildignore+=*.dll,*.exe
 set wildignore+=*.o,*.obj,*.class,*.pyc,*.log,*.pidb,*.jar,*.class
@@ -145,8 +144,8 @@ noremap W :w<cr>
 nmap <leader>q :q!<cr>
 nmap <leader>w :w!<cr>
 
-nmap <leader>ev :vsplit ~/.vimrc<cr>
-nmap <leader>sv :source ~/.vimrc<cr>
+nmap <leader>ev :vsplit ~/.config/nvim/init.vim<cr>
+nmap <leader>sv :source ~/.config/nvim/init.vim<cr>
 
 " Pull word under cursor into LHS of a substitute
 nmap <leader>z :%s#\<<c-r>=expand("<cword>")<cr>\>#
@@ -171,6 +170,8 @@ nmap <leader>cp :cprevious<cr>
 
 " close the quickfix window if it it is the only remaining open window
 autocmd BufEnter * if (winnr('$') == 1 && &ft ==# 'qf') | q | en
+autocmd BufLeave * set colorcolumn=
+autocmd BufEnter * set colorcolumn=79
 
 " }
 
@@ -257,15 +258,34 @@ function! OpenExisingTerminal()
   exec("botright sb " . g:term_buffers[0])
 endfunction
 
-function! ToggleTerminalBuffer()
-  let all_buffers = range(1, bufnr('$'))
-  let g:term_buffers = filter(all_buffers, 'bufname(v:val) =~ "term:\/\/.*"')
-
-  let visible_map = {}
-  for bn in tabpagebuflist()
-      let visible_map[bn] = bn
-  endfor
+function! ListContains(lst, value)
+    for cur_value in a:lst
+        if cur_value == a:value
+          return 1
+        endif
+    endfor
+    return 0
 endfunction
+
+function! ToggleTerminalBuffer()
+    let all_buffers = range(1, bufnr('$'))
+    let term_buffers = filter(all_buffers, 'bufname(v:val) =~ "term:\/\/.*"')
+
+    if len(term_buffers) == 0
+        return 0
+    endif
+
+    let term_buf_num = term_buffers[0] 
+
+    if ListContains(tabpagebuflist(), term_buf_num)
+        exec("close " . term_buf_num)
+    else
+        exec("botright sb " . term_buf_num)
+    endif
+    return 1
+endfunction
+
+    
 
 " Color name (:help cterm-colors) or ANSI code
 let g:limelight_conceal_ctermfg = 'gray'
@@ -280,16 +300,17 @@ map \c :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
 "     call rpcrequest(rpcstart(expand('$HOME/.bin/nvim-hs-devel.sh')), "PingNvimhs")
 " endif
 
-let g:vimwiki_list = [{'path': '~/Dropbox/wiki/personal/', 'path_html': '~/Dropbox/wiki/personal_html/', 'template_path': '~/Dropbox/wiki/template/'}
-    \]
-
-
-function! PasteIntoScala()
-    let @" = ":paste\nhello"
-    normal p
-endfunction
-
 set rtp+=/usr/local/opt/fzf
 
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
+
+" let g:gruvbox_contrast_dark="hard"
+nmap <leader>f :call ToggleTerminalBuffer()<cr>
+tnoremap <leader>f <c-\><c-n>:call ToggleTerminalBuffer()<cr>
+
+nnoremap <leader>o :call ToggleMaximixed()<cr>
+
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
