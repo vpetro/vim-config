@@ -3,4 +3,5 @@ require'vpetro.completion'
 require'vpetro.treesitter'
 
 require'vpetro.lsp.lua'
---require'vpetro.lsp.java'
+require'vpetro.lsp.python'
+require'vpetro.lsp.haskell'
