@@ -1,12 +1,9 @@
-local configs = require'lspconfig/configs'
-local util = require'lspconfig/util'
+-- local configs = require'lspconfig/configs'
+-- local util = require'lspconfig/util'
 
-USER = vim.fn.expand("$USER")
+USER = vim.fn.expand("$HOME")
 
--- local lua_ls_path = "/Users/petrov/oss/lua-language-server"
--- local lua_ls_binary = "/Users/petrov/oss/lua-language-server/bin/macOS/lua-language-server"
-
-local sumneko_root_path = "/Users/petrov/bin/lsp/lua/lua-language-server"
+local sumneko_root_path = USER .. "/bin/lsp/lua/lua-language-server"
 local sumneko_binary = sumneko_root_path .. "/bin/macOS/lua-language-server"
 
 
@@ -33,18 +30,19 @@ require'lspconfig'.sumneko_lua.setup {
   settings = {
     Lua = {
       runtime = {
-        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
         version = 'LuaJIT',
-        -- Setup your lua path
         path = path,
       },
       diagnostics = {
         -- Get the language server to recognize the `vim` global
-        globals = {'vim'},
+        globals = {'vim', 'hs'},
       },
       workspace = {
         -- Make the server aware of Neovim runtime files
-        library = vim.api.nvim_get_runtime_file("", true),
+        library = {
+          ['/Applications/Hammerspoon.app/Contents/Resources/extensions/hs/'] = true,
+          vim.api.nvim_get_runtime_file("", true)
+        },
       },
     },
   },
