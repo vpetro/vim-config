@@ -8,6 +8,7 @@ null_ls.setup({
           extra_args = { "--indent-type Spaces", "--indent-width 2"}
         },
         formatting.black.with { extra_args = { "--fast" } },
-        diagnostics.flake8
+        diagnostics.flake8,
+        diagnostics.mypy
     },
 })
