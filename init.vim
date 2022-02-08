@@ -18,6 +18,9 @@ Plug 'saadparwaiz1/cmp_luasnip'
 
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
 
+Plug 'nvim-lua/plenary.nvim'
+Plug 'jose-elias-alvarez/null-ls.nvim', {'branch': 'main'}
+
 " java language server
 Plug 'mfussenegger/nvim-jdtls'
 
