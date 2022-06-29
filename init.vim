@@ -46,6 +46,8 @@ set background=dark
 " colorscheme gruvbox
 colorscheme petro
 
+" neovim 0.7 global status line. the color scheme has to be tweaked to use this best
+set laststatus=3
 
 set noerrorbells
 set novisualbell
