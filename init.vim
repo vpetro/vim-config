@@ -3,7 +3,6 @@
 " themes
 Plug 'vpetro/vim-petro-colors'
 Plug 'gruvbox-community/gruvbox'
-Plug 'ayu-theme/ayu-vim'
 
 Plug 'L3MON4D3/LuaSnip'
 
