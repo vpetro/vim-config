@@ -25,6 +25,10 @@ Plug 'mfussenegger/nvim-jdtls'
 
 Plug 'junegunn/goyo.vim'
 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+Plug 'tpope/vim-fugitive'
 call plug#end()
 
 lua require("vpetro")
