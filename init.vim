@@ -42,9 +42,9 @@ let g:loaded_perl_provider = 0
 set guifont=Monaco:h13
 set background=dark
 
-colorscheme petro
 " set termguicolors
 " colorscheme gruvbox
+colorscheme petro
 
 
 set noerrorbells
