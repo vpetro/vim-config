@@ -1,11 +1,5 @@
--- local configs = require'lspconfig/configs'
--- local util = require'lspconfig/util'
-
+local lh = require("vpetro.lsp_helper")
 USER = vim.fn.expand("$HOME")
-
-local sumneko_root_path = USER .. "/bin/lsp/lua/lua-language-server"
-local sumneko_binary = sumneko_root_path .. "/bin/macOS/lua-language-server"
-
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
@@ -25,7 +19,6 @@ table.insert(path, "/Users/petrov/.luarocks/share/lua/5.4/?.lua")
 table.insert(path, "/Users/petrov/.luarocks/share/lua/5.4/?/init.lua")
 
 require'lspconfig'.sumneko_lua.setup {
-  cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"};
   capabilities = capabilities,
   settings = {
     Lua = {
@@ -48,3 +41,6 @@ require'lspconfig'.sumneko_lua.setup {
   },
 }
 
+
+lh.setup_diagnostics()
+lh.setup_keymaps()
