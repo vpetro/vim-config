@@ -15,6 +15,8 @@ Plug 'hrsh7th/cmp-cmdline', {'branch': 'main'}
 Plug 'hrsh7th/nvim-cmp', {'branch': 'main'}
 Plug 'saadparwaiz1/cmp_luasnip'
 
+Plug 'onsails/lspkind.nvim', {'branch': 'master'}
+
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
 
 Plug 'nvim-lua/plenary.nvim'
@@ -29,6 +31,8 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 Plug 'tpope/vim-fugitive'
+
+Plug 'tpope/vim-vinegar'
 call plug#end()
 
 lua require("vpetro")
@@ -47,7 +51,9 @@ set background=dark
 colorscheme petro
 
 " neovim 0.7 global status line. the color scheme has to be tweaked to use this best
-set laststatus=3
+" continue to use the same status line as before
+" to have a global, set to 3
+set laststatus=2
 
 set noerrorbells
 set novisualbell
