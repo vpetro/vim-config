@@ -35,6 +35,8 @@ Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 Plug 'tpope/vim-fugitive'
 
 Plug 'tpope/vim-vinegar'
+
+Plug 'terrortylor/nvim-comment', {'branch': 'main'}
 call plug#end()
 
 lua require("vpetro")
