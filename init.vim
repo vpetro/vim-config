@@ -41,7 +41,7 @@ call plug#end()
 
 lua require("vpetro")
 
-let g:python3_host_prog = '/usr/local/bin/python3'
+let g:python3_host_prog = '/Users/petrov/.pyenv/shims/python'
 let g:loaded_python_provider = 0
 let g:loaded_ruby_provider = 0
 let g:loaded_perl_provider = 0
