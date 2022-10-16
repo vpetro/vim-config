@@ -27,8 +27,10 @@ Plug 'mfussenegger/nvim-jdtls'
 
 Plug 'junegunn/goyo.vim'
 
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+" Plug 'junegunn/fzf.vim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+
 
 Plug 'tpope/vim-fugitive'
 
@@ -148,3 +150,8 @@ snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
 
 imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
 smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
+
+" telescope
+nnoremap <C-t> <cmd>lua require('telescope.builtin').find_files()<cr>
+nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+
