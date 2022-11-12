@@ -9,8 +9,14 @@ null_ls.setup({
           diagnostic_config = lh.get_diagnostic_config(),
           extra_args = { "--indent-type Spaces", "--indent-width 2"}
         },
-        formatting.black.with { diagnostic_config = lh.get_diagnostic_config(), extra_args = { "--fast" } },
-        diagnostics.flake8.with { diagnostic_config = lh.get_diagnostic_config() },
+        formatting.black.with {
+          diagnostic_config = lh.get_diagnostic_config(),
+          extra_args = { "--fast" }
+        },
+        diagnostics.flake8.with {
+          diagnostic_config = lh.get_diagnostic_config() ,
+          extra_args = { "--ignore=E501" }
+        },
         diagnostics.mypy.with { diagnostic_config = lh.get_diagnostic_config() }
     },
 })
