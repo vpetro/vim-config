@@ -1,12 +1,17 @@
  call plug#begin('~/.config/.nvim/plugged')
 
 " themes
+
 Plug 'vpetro/vim-petro-colors'
-Plug 'gruvbox-community/gruvbox'
+Plug 'EdenEast/nightfox.nvim', {'branch': 'main'}
+Plug 'catppuccin/nvim', {'branch': 'main', 'as': 'catppuccin' }
+
+
 
 Plug 'L3MON4D3/LuaSnip'
 
 Plug 'neovim/nvim-lspconfig'
+
 Plug 'hrsh7th/cmp-nvim-lua', {'branch': 'main'}
 Plug 'hrsh7th/cmp-nvim-lsp', {'branch': 'main'}
 Plug 'hrsh7th/cmp-buffer', {'branch': 'main'}
