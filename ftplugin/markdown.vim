@@ -74,3 +74,63 @@ iabbrev <buffer> apps applications
 iabbrev <buffer> mss microservice
 iabbrev <buffer> msss microservices
 
+
+
+lua << EOF
+function _select_inside_markdown_block()
+  -- zero is the current window here
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+
+  -- get the node at the current cursor position
+  local node = vim.treesitter.get_node({pos = { row -1, col }})
+
+  -- we are somehow not on a treesitter node
+  if not node then return end
+
+  -- walk up the tree until we find the fenced block content node
+  while node and node:type() ~= "code_fence_content" do
+    node = node:parent()
+  end
+
+  if not node then return end
+
+  local start_row, start_col, end_row, _  = node:range()
+
+  select_lines(start_row, start_col, end_row - 1, 0)
+end
+
+function select_lines(start_line, start_col, end_line, end_col)
+  -- if we're not in visual mode, start it
+  if not vim.fn.mode():match('[vV]') then
+    vim.cmd("normal! v")
+  end
+
+  -- move to the first line of the block
+  vim.api.nvim_win_set_cursor(0, {start_line+1, 0})
+
+  -- go back to where we started the visual selection
+  vim.cmd('normal! o')
+
+  -- move to the end of the block
+  vim.api.nvim_win_set_cursor(0, { end_line + 1, 0 })
+
+  -- move the cursor to the end of the last line of the block
+  local line = vim.api.nvim_get_current_line()
+  vim.api.nvim_win_set_cursor(0, { end_line + 1, #line })
+end
+
+
+vim.keymap.set(
+  'x', -- mode
+  'if', -- mapping
+  _select_inside_markdown_block
+)
+
+vim.keymap.set(
+  'o', -- mode
+  'if', -- mapping
+  _select_inside_markdown_block
+)
+
+EOF
+
