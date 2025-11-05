@@ -6,6 +6,8 @@ Plug 'vpetro/vim-petro-colors'
 Plug 'EdenEast/nightfox.nvim', {'branch': 'main'}
 Plug 'catppuccin/nvim', {'branch': 'main', 'as': 'catppuccin' }
 
+Plug 'lukas-reineke/indent-blankline.nvim', {'branch': 'master'}
+Plug 'HiPhish/rainbow-delimiters.nvim', {'branch': 'master'}
 
 
 Plug 'L3MON4D3/LuaSnip'
@@ -23,45 +25,58 @@ Plug 'saadparwaiz1/cmp_luasnip'
 Plug 'onsails/lspkind.nvim', {'branch': 'master'}
 
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
+Plug 'nvim-treesitter/playground'
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 
 Plug 'nvim-lua/plenary.nvim'
-Plug 'jose-elias-alvarez/null-ls.nvim', {'branch': 'main'}
+Plug 'nvimtools/none-ls.nvim', {'branch': 'main'}
+Plug 'nvimtools/none-ls-extras.nvim', {'branch': 'main'}
 
-" java language server
-Plug 'mfussenegger/nvim-jdtls'
 
 Plug 'junegunn/goyo.vim'
 
-" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-" Plug 'junegunn/fzf.vim'
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 
+Plug 'nvim-tree/nvim-web-devicons'
+Plug 'nvim-tree/nvim-tree.lua'
 
 Plug 'tpope/vim-fugitive'
 
+
 Plug 'tpope/vim-vinegar'
 
-Plug 'terrortylor/nvim-comment', {'branch': 'main'}
+Plug 'tpope/vim-commentary'
+
+Plug 'tpope/vim-surround'
+
+Plug 'cuducos/yaml.nvim', {'branch': 'main'}
+Plug 'samueljoli/hurl.nvim', {'branch': 'main'}
+Plug 'NoahTheDuke/vim-just', {'branch': 'main'}
+Plug 'ekalinin/dockerfile.vim'
+
+
+set encoding=utf-8
+
 call plug#end()
 
 lua require("vpetro")
+lua require("yaml_nvim")
 
 let g:python3_host_prog = '/Users/petrov/.pyenv/shims/python'
 let g:loaded_python_provider = 0
 let g:loaded_ruby_provider = 0
 let g:loaded_perl_provider = 0
 
+set noswapfile
+
 
 set guifont=Monaco:h13
 set background=dark
 
-" set termguicolors
-" colorscheme gruvbox
+set notermguicolors
 colorscheme petro
 
-" neovim 0.7 global status line. the color scheme has to be tweaked to use this best
-" continue to use the same status line as before
-" to have a global, set to 3
 set laststatus=2
 
 set noerrorbells
@@ -111,6 +126,12 @@ set smartcase
 set incsearch
 set hlsearch
 
+" turn off line wrapping
+set nowrap
+
+" turn off the sign column by default, can tun it on later
+set signcolumn=no
+
 nmap <silent> <C-n> :noh<CR>
 nmap n nzz
 nmap N Nzz
@@ -133,20 +154,28 @@ au BufRead,BufNewFile *.sbt set filetype=scala
 autocmd FileType json syntax match Comment +\/\/.\+$+
 
 " set completeopt=menuone,noinsert,noselect
-set completeopt=menu,menuone,noselect
+" set completeopt=menu,menuone,noselect
+set completeopt=menu,menuone
 
 set shortmess+=c
 
+" setup folding by using treesitter
+set foldmethod=expr
+set foldexpr=nvim_treesitter#foldexpr()
+set foldenable
+set foldlevel=0
+set foldnestmax=1
 
-map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
-\ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
-\ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
-
+" set foldclose=all " Close folds if you leave them in any way
+" set foldcolumn=1 " Show the foldcolumn
+" set foldmethod=syntax " Fold on the syntax
+" set foldopen=all " Open folds if you touch them in any way
 
 hi! link LspReferenceText CursorColumn
 hi! link LspReferenceRead CursorColumn
 hi! link LspReferenceWrite CursorColumn
 
+set signcolumn=yes
 
 " luasnip configuration
 imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
@@ -159,6 +188,15 @@ imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' 
 smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
 
 " telescope
-nnoremap <C-t> <cmd>lua require('telescope.builtin').find_files()<cr>
-nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+" nnoremap <leader>t <cmd>lua require('telescope.builtin').find_files()<cr>
+" nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+" fzf
+nnoremap <leader>t :GitFiles<cr>
+nnoremap <leader>f :Files<cr>
+nnoremap <leader>b :Buffers<cr>
 
+nnoremap <C-w>u :source ~/session.vim<CR>
+nnoremap <C-w>o :mksession! ~/session.vim<CR>:wincmd o<CR>
+
+nmap <space>gm :Gvdiffsplit main<cr>
+nmap <space>gh :Gclog -- %<cr>
