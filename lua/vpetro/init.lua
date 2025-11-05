@@ -53,8 +53,8 @@ require'vpetro.lsp_helper'
 
 -- lsp
 require'vpetro.lua'
-require'vpetro.scala'
-require'vpetro.js'
+-- require'vpetro.scala'
+-- require'vpetro.js'
 require'vpetro.rust'
 require'vpetro.docker'
 
@@ -62,7 +62,7 @@ require'vpetro.python'
 require'vpetro.null'
 
 
-require'vpetro.dart'
+-- require'vpetro.dart'
 
 -- require'vpetro.snippets'
 require'vpetro.completion'
@@ -70,7 +70,7 @@ require'vpetro.treesitter'
 
 -- llm plugin
 -- require("vpetro.llm").setup()
-require("vpetro.llm_streamng").setup({})
+-- require("vpetro.llm_streamng").setup({})
 -- require("vpetro.llm_streaming")
 
 
