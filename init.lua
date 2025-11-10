@@ -1,4 +1,3 @@
-
 vim.pack.add({
   {
     src = 'http://github.com/vpetro/vim-petro-colors',
@@ -12,6 +11,7 @@ vim.pack.add({
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter-textobjects' },
 
   -- generic lsp
+  { src = 'https://github.com/nvim-lua/plenary.nvim' },
   { src = 'https://github.com/nvimtools/none-ls.nvim' },
   { src = 'https://github.com/nvimtools/none-ls-extras.nvim' },
 
@@ -99,7 +99,7 @@ vim.opt.suffixes = {
 
 vim.opt.wildmenu = true
 
-vim.opt.wildignore = { 
+vim.opt.wildignore = {
   '*/.hg/*',
   '*/.svn/*',
   '*/images/*',
@@ -141,7 +141,7 @@ vim.opt.wrap = false
 
 vim.opt.signcolumn = 'yes'
 
-vim.opt.completeopt = {'menu', 'menuone', 'noinsert' }
+vim.opt.completeopt = { 'menu', 'menuone', 'noinsert' }
 vim.opt.shortmess:append('c')
 
 
@@ -211,7 +211,6 @@ vim.diagnostic.config({
 
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(_)
-
     -- configure signature help
     vim.lsp.handlers['textDocument/signatureHelp'] = {
       border = 'rounded',
@@ -248,8 +247,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.cmd("normal! zz")
       end
     )
-
   end
 })
 
 vim.lsp.enable('lua_ls')
+require('lsp.null')
