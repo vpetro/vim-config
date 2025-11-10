@@ -58,11 +58,11 @@ vim.opt.spell = false
 
 vim.opt.list = true
 vim.opt.listchars = {
-  space = '·',
+  -- space = '·',
   tab = '» ',
   extends = '»',
   precedes = '«',
-  eol = '↲',
+  -- eol = '↲',
 }
 
 vim.opt.suffixes = {
@@ -144,6 +144,28 @@ vim.opt.signcolumn = 'yes'
 vim.opt.completeopt = {'menu', 'menuone', 'noinsert' }
 vim.opt.shortmess:append('c')
 
+
+require('fzf-lua').setup({
+  winopts = {
+    split = 'belowright 20new',
+    border = 'single',
+    preview = {
+      hidden = 'hidden',
+      border = 'border',
+      title = false,
+      layout = 'horizontal',
+      horizontal = 'right:50%',
+    },
+  },
+})
+
+require('catppuccin').setup({
+  background = { dark = 'macchiato' }
+})
+
+vim.cmd.colorscheme("petro")
+
+
 vim.g.mapleader = ' '
 
 vim.keymap.set('n', '<leader>q', ':q!<cr>')
@@ -178,23 +200,4 @@ vim.keymap.set('n', '<leader>gm', ':Gvdiffsplit main<CR>')
 vim.keymap.set('n', '<leader>gh', ':Gclog -- %<CR>')
 
 
-require('fzf-lua').setup({
-  winopts = {
-    split = 'belowright 20new',
-    border = 'single',
-    preview = {
-      hidden = 'hidden',
-      border = 'border',
-      title = false,
-      layout = 'horizontal',
-      horizontal = 'right:50%',
-    },
-  },
-})
-
-require('catppuccin').setup({
-  background = { dark = 'macchiato' }
-})
-
-vim.cmd.colorscheme("petro")
-
+vim.lsp.enable('lua_ls')
