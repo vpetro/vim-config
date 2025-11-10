@@ -200,4 +200,56 @@ vim.keymap.set('n', '<leader>gm', ':Gvdiffsplit main<CR>')
 vim.keymap.set('n', '<leader>gh', ':Gclog -- %<CR>')
 
 
+-- LSP
+
+vim.diagnostic.config({
+  virtual_text = false,
+  signs = true,
+  update_in_insert = false,
+  underline = true,
+})
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(_)
+
+    -- configure signature help
+    vim.lsp.handlers['textDocument/signatureHelp'] = {
+      border = 'rounded',
+      max_width = 80,
+      max_height = 10,
+      style = 'minimal',
+      relative = 'cursor',
+      focusable = false,
+    }
+
+    -- configure lsp key bindings
+    vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
+
+    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>')
+    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>')
+    vim.keymap.set('n', 'gu', '<cmd>lua vim.lsp.buf.references()<CR>')
+
+    vim.keymap.set('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>')
+    vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>')
+
+    -- diagnostics
+    vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
+    vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>')
+    vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.setloclist()<CR>')
+    -- hover a box with the message
+    vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float({scope = "line"})<CR>')
+    vim.keymap.set('n', 'gw', '<cmd>lua vim.lsp.buf.format()<CR>')
+
+
+    vim.keymap.set("n", "gd",
+      function()
+        vim.cmd("vertical botright split")
+        vim.lsp.buf.definition()
+        vim.cmd("normal! zz")
+      end
+    )
+
+  end
+})
+
 vim.lsp.enable('lua_ls')
