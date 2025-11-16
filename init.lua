@@ -25,7 +25,7 @@ vim.pack.add({
   { src = 'https://github.com/tpope/vim-commentary' },
 
   -- surrounding text objects
-  { src = 'https://github.com/tpope/vim-surround' },
+          { src = 'https://github.com/tpope/vim-surround' },
 
   -- rainbow parens
   { src = 'https://github.com/HiPhish/rainbow-delimiters.nvim' },
@@ -35,6 +35,13 @@ vim.pack.add({
 
   -- fuzzy finder
   { src = 'https://github.com/ibhagwan/fzf-lua' },
+
+  -- completion & snippets
+  -- not sure about the snippets
+  -- { src = 'https://github.com/rafamadriz/friendly-snippets' },
+  { src = 'https://github.com/saghen/blink.cmp' },
+
+
 })
 
 
@@ -147,7 +154,7 @@ vim.opt.shortmess:append('c')
 
 require('fzf-lua').setup({
   winopts = {
-    split = 'belowright 20new',
+    split = 'botright 20new',
     border = 'single',
     preview = {
       hidden = 'hidden',
@@ -184,9 +191,8 @@ vim.keymap.set('n', '<C-j>', '<C-w>j')
 vim.keymap.set('n', '<C-k>', '<C-w>k')
 vim.keymap.set('n', '<C-l>', '<C-w>l')
 
-vim.keymap.set('n', '<leader>t', ':GitFiles<cr>')
-vim.keymap.set('n', '<leader>f', ':Files<cr>')
-vim.keymap.set('n', '<leader>b', ':Buffers<cr>')
+vim.keymap.set('n', '<leader>t', '<cmd>FzfLua git_files<cr>')
+vim.keymap.set('n', '<leader>f', '<cmd>FzfLua files<cr>')
 
 local function maximize_split()
   vim.cmd('mksession! ~/.session.vim')
@@ -231,6 +237,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>')
     vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>')
 
+    -- enable inline hints for functions and types
+    vim.keymap.set('n', '<leader>bb',
+      function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+      end
+    )
+
     -- diagnostics
     vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
     vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>')
@@ -238,6 +251,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- hover a box with the message
     vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float({scope = "line"})<CR>')
     vim.keymap.set('n', 'gw', '<cmd>lua vim.lsp.buf.format()<CR>')
+
 
 
     vim.keymap.set("n", "gd",
@@ -250,5 +264,123 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end
 })
 
+
+
 vim.lsp.enable('lua_ls')
-require('lsp.null')
+vim.lsp.enable('python')
+vim.lsp.enable("ty")
+vim.lsp.enable('go')
+
+local null_ls = require('null-ls')
+local formatting = null_ls.builtins.formatting
+
+null_ls.setup({
+  sources = {
+    formatting.stylua.with {
+      extra_args = { "--indent-type Spaces", "--indent-width 2" }
+    },
+    formatting.isort,
+  },
+})
+
+require("blink.cmp").setup({
+  signature = { enabled = true },
+  completion = {
+    list = {
+      selection = { preselect = false, auto_insert = true } },
+    menu = {
+      auto_show = false,
+    },
+  },
+  keymap = {
+    ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+    ['<C-e>'] = { 'hide', 'fallback' },
+    ['<CR>'] = { 'accept', 'fallback' },
+
+    ['<Tab>'] = { 'snippet_forward', 'fallback' },
+    ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+    ['<Up>'] = { 'select_prev', 'fallback' },
+    ['<Down>'] = { 'select_next', 'fallback' },
+    ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+    ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
+
+    ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+    ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+    ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
+  }
+})
+
+
+require('nvim-treesitter.configs').setup {
+  -- "query" is necessary in order to make the query editor work in playground
+  ensure_installed = {
+    "markdown",
+    "query",
+    "lua", "vimdoc",
+    "python",
+    "json", "yaml",
+    "javascript", "typescript",
+    "go"
+  },
+  indent = {
+    enable = true,
+    -- disable = {"python", "yaml"},
+  },
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = "gnn",    -- start selection
+      node_incremental = "grn",  -- expand selection
+      scope_incremental = "grc", -- expand selection
+      node_decremental = "grm"   -- shrink selection
+    }
+  },
+  playground = {
+    enable = true,
+    disable = {},
+    updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
+    persist_queries = false, -- Whether the query persists across vim sessions
+    keybindings = {
+      toggle_query_editor = 'o',
+      toggle_hl_groups = 'i',
+      toggle_injected_languages = 't',
+      toggle_anonymous_nodes = 'a',
+      toggle_language_display = 'I',
+      focus_language = 'f',
+      unfocus_language = 'F',
+      update = 'R',
+      goto_node = '<cr>',
+      show_help = '?',
+    },
+  },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true,
+      keymaps = {
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+      },
+    },
+    swap = {
+      enable = false,
+    },
+    lsp_interop = {
+      enable = true,
+      border = 'none',
+      floating_preview_opts = {},
+      peek_definition_code = {
+        ["<leader>df"] = "@function.outer",
+        ["<leader>dF"] = "@class.outer",
+      },
+    },
+  },
+}

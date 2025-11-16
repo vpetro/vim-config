@@ -1,4 +1,3 @@
-
 local path = vim.split(package.path, ';')
 
 table.insert(path, "lua/?.lua")
@@ -20,12 +19,15 @@ return {
   root_markers = { '.luarc.json', '.luarc.jsonc' },
   settings = {
     Lua = {
+      hint = {
+        enable = true,
+      },
       runtime = {
         version = 'LuaJIT',
         path = path,
       },
       diagnostics = {
-        globals = {'vim', 'hs'},
+        globals = { 'vim', 'hs' },
       },
       workspace = {
         library = {
@@ -40,4 +42,3 @@ return {
     },
   },
 }
-
