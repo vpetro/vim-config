@@ -6,9 +6,8 @@ vim.pack.add({
   { src = 'https://github.com/catppuccin/nvim' },
 
   -- treesitter
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
-  { src = 'https://github.com/nvim-treesitter/playground' },
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter-textobjects' },
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main' },
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter-textobjects', branch = 'main' },
 
   -- generic lsp
   { src = 'https://github.com/nvim-lua/plenary.nvim' },
@@ -28,7 +27,7 @@ vim.pack.add({
           { src = 'https://github.com/tpope/vim-surround' },
 
   -- rainbow parens
-  { src = 'https://github.com/HiPhish/rainbow-delimiters.nvim' },
+  -- { src = 'https://github.com/HiPhish/rainbow-delimiters.nvim', enabled = false},
 
   -- distraction free mode
   { src = 'https://github.com/junegunn/goyo.vim' },
@@ -41,14 +40,16 @@ vim.pack.add({
   -- { src = 'https://github.com/rafamadriz/friendly-snippets' },
   { src = 'https://github.com/saghen/blink.cmp' },
 
+  { src = "https://github.com/iamcco/markdown-preview.nvim" },
+
+  { src = "https://github.com/sindrets/diffview.nvim" }
 
 })
-
 
 vim.opt.encoding = "utf-8"
 vim.opt.swapfile = false
 vim.opt.background = "dark"
-vim.opt.termguicolors = false
+vim.opt.termguicolors = true
 
 vim.opt.laststatus = 2
 
@@ -60,6 +61,7 @@ vim.opt.tabstop = 2
 vim.opt.expandtab = true
 vim.opt.autoindent = true
 vim.opt.smartindent = true
+
 
 vim.opt.spell = false
 
@@ -164,14 +166,174 @@ require('fzf-lua').setup({
       horizontal = 'right:50%',
     },
   },
+  fzf_opts = {
+    ['--pointer'] = '>',
+    ['--marker'] = '+',
+  },
+  -- Map the inner fzf process's colors onto nvim highlight groups so the
+  -- fzf window matches whichever petro variant is active (petro or petro-tc).
+  -- fzf-lua resolves cterm vs gui automatically based on termguicolors.
+  fzf_colors = {
+    ["fg"]      = { "fg", "Normal" },
+    ["bg"]      = "-1",                       -- inherit terminal bg
+    ["hl"]      = { "fg", "Type" },           -- query matches in unselected (gold)
+    ["fg+"]     = { "fg", "Normal" },
+    ["bg+"]     = { "bg", "Visual" },         -- selected line bg (bg_alt)
+    ["hl+"]     = { "fg", "Function" },       -- query matches in selected (orange)
+    ["info"]    = { "fg", "Comment" },        -- "10/100" counter
+    ["prompt"]  = { "fg", "Function" },
+    ["pointer"] = { "fg", "Function" },       -- the '>' pointer
+    ["marker"]  = { "fg", "Type" },           -- the '+' multi-select marker
+    ["spinner"] = { "fg", "Type" },
+    ["header"]  = { "fg", "Comment" },
+    ["gutter"]  = "-1",                       -- left margin (inherit terminal bg)
+    ["border"]  = { "fg", "FloatBorder" },
+  },
+  keymap = {
+    -- keybindings passed to the fzf binary (only work if fzf is installed)
+    fzf = {
+      ['ctrl-j'] = 'down',
+      ['ctrl-k'] = 'up',
+      ['ctrl-n'] = 'down',
+      ['ctrl-p'] = 'up',
+    },
+    -- neovim-level keybindings for the fzf-lua window
+    builtin = {
+      ['<C-j>'] = 'down',
+      ['<C-k>'] = 'up',
+      ['<C-n>'] = 'down',
+      ['<C-p>'] = 'up',
+    },
+  },
 })
 
 require('catppuccin').setup({
   background = { dark = 'macchiato' }
 })
 
-vim.cmd.colorscheme("petro")
+-- Markdown (and other @markup.*) highlights for the 256-color petro theme.
+-- Treesitter highlights markdown via @markup.* groups, which petro.vim never
+-- defines, so markdown fell back to Neovim's bland defaults (all headings the
+-- same colorless Title group, inline code as Comment gray, etc).
+-- Registered as a ColorScheme autocmd so the groups survive the FocusGained
+-- colorscheme re-apply and the :Petro toggle. petro-tc defines its own.
+local function petro_markup_highlights()
+  local function hl(group, opts)
+    vim.api.nvim_set_hl(0, group, opts)
+  end
 
+  -- Pull code colors straight from the active theme so markdown elements
+  -- reuse the exact palette regular code gets.
+  local function theme(name)
+    return vim.api.nvim_get_hl(0, { name = name, link = false })
+  end
+  local str, stmt, cmnt, const, kw =
+    theme("String"), theme("Statement"), theme("Comment"), theme("Constant"), theme("Keyword")
+
+  -- headings: mirror markdownH1-H3 from petro.vim, extended through H6
+  hl("@markup.heading", { ctermfg = 179, cterm = { bold = true }, bold = true })
+  hl("@markup.heading.1", { ctermfg = 13, cterm = { bold = true }, bold = true })
+  hl("@markup.heading.2", { ctermfg = 12, cterm = { bold = true }, bold = true })
+  hl("@markup.heading.3", { ctermfg = 74, cterm = { bold = true }, bold = true })
+  hl("@markup.heading.4", { ctermfg = 108 })
+  hl("@markup.heading.5", { ctermfg = 109 })
+  hl("@markup.heading.6", { ctermfg = 179 })
+
+  -- inline emphasis. Bold fonts are disabled in the terminal on purpose,
+  -- so give **strong** text a warm peach fg (Function color family) to
+  -- lift it off the gray body text (bold attr kept for terminals that
+  -- honor it).
+  hl("@markup.strong", { ctermfg = 180, cterm = { bold = true }, bold = true })
+  hl("@markup.italic", { cterm = { italic = true }, italic = true })
+  hl("@markup.underline", { cterm = { underline = true }, underline = true })
+  hl("@markup.strikethrough", { cterm = { strikethrough = true }, strikethrough = true })
+
+  -- links: Keyword blue labels, Constant cyan urls
+  hl("@markup.link", { fg = kw.fg, ctermfg = kw.ctermfg })
+  hl("@markup.link.label", { fg = kw.fg, ctermfg = kw.ctermfg })
+  hl("@markup.link.url", { fg = const.fg, ctermfg = const.ctermfg, cterm = { underline = true }, underline = true })
+
+  -- inline code: same color as code strings
+  hl("@markup.raw", { fg = str.fg, ctermfg = str.ctermfg })
+  -- fenced code blocks: no tint; the injected language highlighting colors
+  -- the block exactly like a regular source buffer
+  hl("@markup.raw.block", { link = "Normal" })
+
+  -- list bullets: Statement brown; tasks use String/Comment colors
+  hl("@markup.list", { fg = stmt.fg, ctermfg = stmt.ctermfg })
+  hl("@markup.list.checked", { fg = str.fg, ctermfg = str.ctermfg })
+  hl("@markup.list.unchecked", { fg = cmnt.fg, ctermfg = cmnt.ctermfg })
+
+  -- blockquotes: Comment gray, italicized
+  hl("@markup.quote", { fg = cmnt.fg, ctermfg = cmnt.ctermfg, cterm = { italic = true }, italic = true })
+
+  -- legacy regex-syntax groups (used anywhere treesitter isn't running)
+  hl("markdownH4", { link = "@markup.heading.4" })
+  hl("markdownH5", { link = "@markup.heading.5" })
+  hl("markdownH6", { link = "@markup.heading.6" })
+  hl("markdownCode", { link = "@markup.raw" })
+  hl("markdownCodeBlock", { link = "@markup.raw" })
+  hl("markdownLinkText", { link = "@markup.link.label" })
+  hl("markdownUrl", { link = "@markup.link.url" })
+  hl("markdownListMarker", { link = "@markup.list" })
+  hl("markdownBlockquote", { link = "@markup.quote" })
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "petro",
+  callback = petro_markup_highlights,
+})
+
+-- petro-tc defines the full @markup.* set itself; layer on the markdown
+-- decisions made in this config (true-color twins of the petro tweaks).
+local function petro_tc_markup_overrides()
+  -- bold fonts are disabled in the terminal on purpose, so **strong**
+  -- text gets a muted peach fg instead (hex twin of cterm 180)
+  vim.api.nvim_set_hl(0, "@markup.strong", { fg = "#D7AF87", bold = true })
+  -- fenced code blocks: no tint; the injected language highlighting
+  -- colors them exactly like a regular source buffer
+  vim.api.nvim_set_hl(0, "@markup.raw.block", { link = "Normal" })
+  -- task list states (not defined by the theme)
+  vim.api.nvim_set_hl(0, "@markup.list.checked", { fg = "#87AF00" })   -- String olive
+  vim.api.nvim_set_hl(0, "@markup.list.unchecked", { fg = "#6C6C6C" }) -- Comment gray
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "petro-tc",
+  callback = petro_tc_markup_overrides,
+})
+
+-- Default to the true-color theme; :Petro toggles back to the 256-color one.
+vim.cmd.colorscheme("petro-tc")
+
+-- Toggle commands to compare the original 256-color theme against the
+-- true-color rewrite without ripping out either one.
+vim.api.nvim_create_user_command("Petro", function()
+  vim.opt.termguicolors = false
+  vim.cmd.colorscheme("petro")
+end, { desc = "Use the original 256-color petro theme" })
+
+vim.api.nvim_create_user_command("PetroTC", function()
+  vim.opt.termguicolors = true
+  vim.cmd.colorscheme("petro-tc")
+end, { desc = "Use the true-color petro-tc theme" })
+
+-- Dim neovim when tmux pane loses focus.
+-- The FocusGained callback re-applies whatever colorscheme is currently
+-- active so toggling via :PetroTC / :Petro survives a focus change.
+vim.api.nvim_create_autocmd("FocusLost", {
+  callback = function()
+    vim.api.nvim_set_hl(0, "Normal", { bg = "#1e2028" })
+    vim.api.nvim_set_hl(0, "NormalNC", { bg = "#1e2028" })
+  end,
+})
+vim.api.nvim_create_autocmd("FocusGained", {
+  callback = function()
+    if vim.g.colors_name and vim.g.colors_name ~= "" then
+      vim.cmd.colorscheme(vim.g.colors_name)
+    end
+  end,
+})
 
 vim.g.mapleader = ' '
 
@@ -270,6 +432,7 @@ vim.lsp.enable('lua_ls')
 vim.lsp.enable('python')
 vim.lsp.enable("ty")
 vim.lsp.enable('go')
+vim.lsp.enable('typespec')
 
 local null_ls = require('null-ls')
 local formatting = null_ls.builtins.formatting
@@ -302,8 +465,8 @@ require("blink.cmp").setup({
 
     ['<Up>'] = { 'select_prev', 'fallback' },
     ['<Down>'] = { 'select_next', 'fallback' },
-    ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
-    ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
+    ['<C-p>'] = { 'select_prev', 'fallback' },
+    ['<C-n>'] = { 'select_next', 'fallback' },
 
     ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
     ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -312,75 +475,102 @@ require("blink.cmp").setup({
   }
 })
 
+-- Register custom typespec parser for nvim-treesitter main branch
+vim.api.nvim_create_autocmd('User', { pattern = 'TSUpdate',
+callback = function()
+  require('nvim-treesitter.parsers').typespec = {
+    install_info = {
+      url = 'https://github.com/happenslol/tree-sitter-typespec',
+      branch = 'main',
+    },
+  }
+end})
 
-require('nvim-treesitter.configs').setup {
-  -- "query" is necessary in order to make the query editor work in playground
-  ensure_installed = {
-    "markdown",
-    "query",
-    "lua", "vimdoc",
-    "python",
-    "json", "yaml",
-    "javascript", "typescript",
-    "go"
+vim.filetype.add({
+  extension = {
+    tsp = "typespec",
   },
-  indent = {
-    enable = true,
-    -- disable = {"python", "yaml"},
-  },
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "gnn",    -- start selection
-      node_incremental = "grn",  -- expand selection
-      scope_incremental = "grc", -- expand selection
-      node_decremental = "grm"   -- shrink selection
-    }
-  },
-  playground = {
-    enable = true,
-    disable = {},
-    updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
-    persist_queries = false, -- Whether the query persists across vim sessions
-    keybindings = {
-      toggle_query_editor = 'o',
-      toggle_hl_groups = 'i',
-      toggle_injected_languages = 't',
-      toggle_anonymous_nodes = 'a',
-      toggle_language_display = 'I',
-      focus_language = 'f',
-      unfocus_language = 'F',
-      update = 'R',
-      goto_node = '<cr>',
-      show_help = '?',
-    },
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true,
-      keymaps = {
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-      },
-    },
-    swap = {
-      enable = false,
-    },
-    lsp_interop = {
-      enable = true,
-      border = 'none',
-      floating_preview_opts = {},
-      peek_definition_code = {
-        ["<leader>df"] = "@function.outer",
-        ["<leader>dF"] = "@class.outer",
-      },
-    },
+})
+
+-- Install parsers (no-op if already installed)
+require('nvim-treesitter').install {
+  "markdown", "markdown_inline",
+  "bash",
+  "query",
+  "lua", "vimdoc",
+  "python",
+  "json", "yaml",
+  "javascript", "typescript",
+  "go",
+}
+
+-- Enable treesitter highlighting and indentation for all filetypes
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
+
+-- Textobjects (main branch API)
+require('nvim-treesitter-textobjects').setup {
+  select = {
+    lookahead = true,
   },
 }
+
+vim.keymap.set({ 'x', 'o' }, 'af', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects')
+end)
+vim.keymap.set({ 'x', 'o' }, 'if', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@function.inner', 'textobjects')
+end)
+vim.keymap.set({ 'x', 'o' }, 'ac', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects')
+end)
+vim.keymap.set({ 'x', 'o' }, 'ic', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects')
+end)
+
+-- Peek definition (replaces lsp_interop from old textobjects)
+vim.keymap.set('n', '<leader>df', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects')
+end)
+vim.keymap.set('n', '<leader>dF', function()
+  require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects')
+end)
+
+-- Playground is replaced by built-in :InspectTree (just use :InspectTree)
+
+
+
+vim.opt.runtimepath:prepend("/Users/pverkhogliad/code/petro/mentat/mentat-pi")
+-- vim.opt.runtimepath:prepend("/Users/pverkhogliad/code/petro/mentat/mentat-lsp-support-claude")
+
+require("mentat").setup({
+  provider = "anthropic",
+  review_provider = "gemini"
+})
+
+vim.g.mkdp_auto_close = 0
+vim.g.mkdp_theme = "dark"
+
+vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Markdown preview" })
+
+-- Nicer reading/editing defaults for markdown buffers.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.opt_local.wrap = true        -- prose: soft-wrap long lines
+    vim.opt_local.linebreak = true   -- ...breaking at word boundaries
+    vim.opt_local.breakindent = true -- wrapped lines keep list indentation
+  end,
+})
+
+require("diffview").setup({
+  merge_tool = {
+    layout = "diff3_mixed",  -- or "diff3_horizontal", "diff3_plain"
+  },
+})
+
+
