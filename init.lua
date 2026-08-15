@@ -612,10 +612,3 @@ require("diffview").setup({
     layout = "diff3_mixed",  -- or "diff3_horizontal", "diff3_plain"
   },
 })
-
-
--- open file under cursor
-vim.keymap.set("n", "gx", function()
-  vim.ui.open(vim.fn.expand("<cfile>"))
-end)
-
