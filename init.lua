@@ -540,7 +540,6 @@ vim.opt.runtimepath:prepend(vim.env.HOME .. "/code/petro/mentat")
 
 require("mentat").setup({
   provider = "anthropic",
-  review_provider = "gemini"
 })
 
 vim.g.mkdp_auto_close = 0
