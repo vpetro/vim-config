@@ -536,7 +536,7 @@ vim.keymap.set({ 'x', 'o' }, 'ic', function()
   require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects')
 end)
 
-vim.opt.runtimepath:prepend("/Users/pverkhogliad/code/petro/mentat/mentat-pi")
+vim.opt.runtimepath:prepend(vim.env.HOME .. "/code/petro/mentat/mentat-pi")
 
 require("mentat").setup({
   provider = "anthropic",
