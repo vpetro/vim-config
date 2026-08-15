@@ -574,14 +574,6 @@ vim.keymap.set({ 'x', 'o' }, 'ic', function()
   require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects')
 end)
 
--- Peek definition (replaces lsp_interop from old textobjects)
-vim.keymap.set('n', '<leader>df', function()
-  require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects')
-end)
-vim.keymap.set('n', '<leader>dF', function()
-  require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects')
-end)
-
 -- Playground is replaced by built-in :InspectTree (just use :InspectTree)
 
 
