@@ -591,6 +591,41 @@ vim.g.mkdp_theme = "dark"
 
 vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Markdown preview" })
 
+-- Toggle a markdown checkbox on the given line, cycling on repeat press:
+--   "buy milk"     -> "- [ ] buy milk"   (plain text -> checkbox item)
+--   "- buy milk"   -> "- [ ] buy milk"   (list item  -> checkbox item)
+--   "- [ ] milk"   -> "- [x] milk"       (uncheck    -> checked)
+--   "- [x] milk"   -> "- [ ] milk"       (checked    -> unchecked)
+local function md_toggle_checkbox(lnum)
+  local line = vim.fn.getline(lnum)
+  if line:match("^%s*[-*+]%s+%[[xX]%]") then
+    line = line:gsub("(%[)[xX](%])", "%1 %2", 1)      -- checked -> unchecked
+  elseif line:match("^%s*[-*+]%s+%[ %]") then
+    line = line:gsub("(%[) (%])", "%1x%2", 1)         -- unchecked -> checked
+  else
+    local indent, marker, rest = line:match("^(%s*)([-*+]%s+)(.*)$")
+    if marker then
+      line = indent .. marker .. "[ ] " .. rest       -- list item -> checkbox
+    else
+      local ind, content = line:match("^(%s*)(.*)$")
+      line = ind .. "- [ ] " .. content               -- plain line -> checkbox item
+    end
+  end
+  vim.fn.setline(lnum, line)
+end
+
+-- Open a new line below and drop in an HTML comment tagged "PV:" for
+-- annotating docs. The comment is invisible in rendered markdown but trivial
+-- to grep ("PV:"). Lands you in insert mode right after the tag:
+--   <!-- PV: | -->
+local function md_insert_pv_comment(lnum)
+  local indent = vim.fn.getline(lnum):match("^(%s*)") or ""
+  local prefix = indent .. "<!-- PV: "
+  vim.fn.append(lnum, prefix .. " -->")
+  vim.api.nvim_win_set_cursor(0, { lnum + 1, #prefix })
+  vim.cmd("startinsert")
+end
+
 -- Nicer reading/editing defaults for markdown buffers.
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "markdown",
@@ -598,6 +633,21 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.wrap = true        -- prose: soft-wrap long lines
     vim.opt_local.linebreak = true   -- ...breaking at word boundaries
     vim.opt_local.breakindent = true -- wrapped lines keep list indentation
+
+    vim.keymap.set("n", "<leader>x", function()
+      md_toggle_checkbox(vim.fn.line("."))
+    end, { buffer = true, desc = "Toggle markdown checkbox" })
+
+    vim.keymap.set("x", "<leader>x", function()
+      local a, b = vim.fn.line("v"), vim.fn.line(".")
+      if a > b then a, b = b, a end
+      for l = a, b do md_toggle_checkbox(l) end
+      vim.api.nvim_input("<Esc>")
+    end, { buffer = true, desc = "Toggle markdown checkbox" })
+
+    vim.keymap.set("n", "<leader>c", function()
+      md_insert_pv_comment(vim.fn.line("."))
+    end, { buffer = true, desc = "Insert PV: HTML comment" })
   end,
 })
 
