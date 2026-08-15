@@ -25,9 +25,6 @@ vim.pack.add({
   -- surrounding text objects
           { src = 'https://github.com/tpope/vim-surround' },
 
-  -- rainbow parens
-  -- { src = 'https://github.com/HiPhish/rainbow-delimiters.nvim', enabled = false},
-
   -- distraction free mode
   { src = 'https://github.com/junegunn/goyo.vim' },
 
@@ -35,8 +32,6 @@ vim.pack.add({
   { src = 'https://github.com/ibhagwan/fzf-lua' },
 
   -- completion & snippets
-  -- not sure about the snippets
-  -- { src = 'https://github.com/rafamadriz/friendly-snippets' },
   { src = 'https://github.com/saghen/blink.cmp' },
 
   { src = "https://github.com/iamcco/markdown-preview.nvim" },
@@ -56,11 +51,9 @@ vim.opt.smartindent = true
 
 vim.opt.list = true
 vim.opt.listchars = {
-  -- space = '·',
   tab = '» ',
   extends = '»',
   precedes = '«',
-  -- eol = '↲',
 }
 
 vim.opt.suffixes = {
@@ -543,12 +536,7 @@ vim.keymap.set({ 'x', 'o' }, 'ic', function()
   require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects')
 end)
 
--- Playground is replaced by built-in :InspectTree (just use :InspectTree)
-
-
-
 vim.opt.runtimepath:prepend("/Users/pverkhogliad/code/petro/mentat/mentat-pi")
--- vim.opt.runtimepath:prepend("/Users/pverkhogliad/code/petro/mentat/mentat-lsp-support-claude")
 
 require("mentat").setup({
   provider = "anthropic",
