@@ -411,17 +411,6 @@ vim.diagnostic.config({
 
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)
-    -- configure signature help
-    vim.lsp.handlers['textDocument/signatureHelp'] = {
-      border = 'rounded',
-      max_width = 80,
-      max_height = 10,
-      style = 'minimal',
-      relative = 'cursor',
-      focusable = false,
-    }
-
-    -- configure lsp key bindings
     vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
 
     vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>')
