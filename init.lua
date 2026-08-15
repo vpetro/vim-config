@@ -411,38 +411,37 @@ vim.diagnostic.config({
 
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)
-    vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
+    local opts = { buffer = args.buf }
 
-    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>')
-    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>')
-    vim.keymap.set('n', 'gu', '<cmd>lua vim.lsp.buf.references()<CR>')
+    vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
 
-    vim.keymap.set('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>')
-    vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>')
+    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+    vim.keymap.set('n', 'gu', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 
-    -- enable inline hints for functions and types
+    vim.keymap.set('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+
     vim.keymap.set('n', '<leader>bb',
       function()
         vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-      end
+      end,
+      opts
     )
 
-    -- diagnostics
-    vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1, float = true }) end)
-    vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1, float = true }) end)
-    vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.setloclist()<CR>')
-    -- hover a box with the message
-    vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float({scope = "line"})<CR>')
-    vim.keymap.set('n', 'gw', '<cmd>lua vim.lsp.buf.format()<CR>')
-
-
+    vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+    vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
+    vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+    vim.keymap.set('n', '<space>e', '<cmd>lua vim.diagnostic.open_float({scope = "line"})<CR>', opts)
+    vim.keymap.set('n', 'gw', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
 
     vim.keymap.set("n", "gd",
       function()
         vim.cmd("vertical botright split")
         vim.lsp.buf.definition()
         vim.cmd("normal! zz")
-      end
+      end,
+      opts
     )
 
     -- While learning TS: auto-show inlay hints in TS/JS buffers. Other servers
