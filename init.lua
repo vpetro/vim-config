@@ -65,7 +65,6 @@ vim.opt.listchars = {
 
 vim.opt.suffixes = {
   '.bak',
-  '.',
   '.swp',
   '.o',
   '.info',
@@ -90,7 +89,6 @@ vim.opt.suffixes = {
   '.ho',
   '.hi',
   '.bc',
-  '.out',
   '.annot',
   '.spot'
 }
