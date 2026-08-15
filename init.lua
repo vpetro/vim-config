@@ -303,6 +303,35 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   callback = petro_tc_markup_overrides,
 })
 
+-- Make fzf-lua windows match the (transparent) editor background.
+-- petro-tc links FzfLua* to NormalFloat -- a solid #1C1C1C panel -- so the
+-- picker rendered as a grey theme floating on the black editor body. Re-point
+-- the fzf surfaces at Normal (which is bg=NONE -> the terminal background
+-- shows through, same as the editor) and drop the panel bg off the
+-- border/title so only their accent fg remains. The border/title fg is read
+-- from the theme at runtime, so there's no palette to keep in sync.
+-- (petro.vim leaves fzf-lua at its defaults, which already link to Normal, so
+-- this override is only registered for petro-tc.)
+local function petro_tc_fzf_overrides()
+  local function fg_on_transparent(src, extra)
+    local h = vim.api.nvim_get_hl(0, { name = src, link = false })
+    local res = { fg = h.fg, ctermfg = h.ctermfg, bg = "NONE", ctermbg = "NONE" }
+    for k, v in pairs(extra or {}) do res[k] = v end
+    return res
+  end
+  vim.api.nvim_set_hl(0, "FzfLuaNormal", { link = "Normal" })
+  vim.api.nvim_set_hl(0, "FzfLuaPreviewNormal", { link = "Normal" })
+  vim.api.nvim_set_hl(0, "FzfLuaBorder", fg_on_transparent("FloatBorder"))
+  vim.api.nvim_set_hl(0, "FzfLuaPreviewBorder", fg_on_transparent("FloatBorder"))
+  vim.api.nvim_set_hl(0, "FzfLuaTitle", fg_on_transparent("FloatTitle", { bold = true }))
+  vim.api.nvim_set_hl(0, "FzfLuaPreviewTitle", fg_on_transparent("FloatTitle", { bold = true }))
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "petro-tc",
+  callback = petro_tc_fzf_overrides,
+})
+
 -- Default to the true-color theme; :Petro toggles back to the 256-color one.
 vim.cmd.colorscheme("petro-tc")
 
