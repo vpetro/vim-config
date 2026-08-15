@@ -474,6 +474,7 @@ vim.lsp.enable('python')
 vim.lsp.enable("ty")
 vim.lsp.enable('go')
 vim.lsp.enable('typespec')
+vim.lsp.enable('tsgo')
 
 local null_ls = require('null-ls')
 local formatting = null_ls.builtins.formatting
