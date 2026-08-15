@@ -20,10 +20,6 @@
       "rev": "a923f5fc5ba36a3b17e289dc35dc17f66d0548ee",
       "src": "https://github.com/iamcco/markdown-preview.nvim"
     },
-    "none-ls-extras.nvim": {
-      "rev": "70659cc3d38151424298ab46b0f67f2251cef231",
-      "src": "https://github.com/nvimtools/none-ls-extras.nvim"
-    },
     "none-ls.nvim": {
       "rev": "9a5d95cdf9f440683f248f6f0e97f8643804c91b",
       "src": "https://github.com/nvimtools/none-ls.nvim"

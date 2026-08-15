@@ -12,7 +12,6 @@ vim.pack.add({
   -- generic lsp
   { src = 'https://github.com/nvim-lua/plenary.nvim' },
   { src = 'https://github.com/nvimtools/none-ls.nvim' },
-  { src = 'https://github.com/nvimtools/none-ls-extras.nvim' },
 
   -- git
   { src = 'https://github.com/tpope/vim-fugitive' },
