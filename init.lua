@@ -401,13 +401,17 @@ vim.keymap.set('n', '<leader>gh', ':Gclog -- %<CR>')
 
 vim.diagnostic.config({
   virtual_text = false,
+  -- Print the full diagnostic message under the line the cursor is on.
+  -- TypeScript errors are wordy but instructive, so seeing them inline (no
+  -- hover needed) is a good way to learn. Set to false if it feels jumpy.
+  virtual_lines = { current_line = true },
   signs = true,
   update_in_insert = false,
   underline = true,
 })
 
 vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(_)
+  callback = function(args)
     -- configure signature help
     vim.lsp.handlers['textDocument/signatureHelp'] = {
       border = 'rounded',
@@ -452,6 +456,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.cmd("normal! zz")
       end
     )
+
+    -- While learning TS: auto-show inlay hints in TS/JS buffers. Other servers
+    -- (gopls etc.) have their hint categories disabled, so this is effectively
+    -- TS/JS-only. <leader>bb still toggles hints on/off.
+    local ft = vim.bo[args.buf].filetype
+    if ft:match('^typescript') or ft:match('^javascript') then
+      vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+    end
   end
 })
 
