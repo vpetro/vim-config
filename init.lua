@@ -45,24 +45,14 @@ vim.pack.add({
 
 })
 
-vim.opt.encoding = "utf-8"
 vim.opt.swapfile = false
 vim.opt.background = "dark"
 vim.opt.termguicolors = true
 
-vim.opt.laststatus = 2
-
--- disable visual the beep and the visual bell/flash
-vim.opt.belloff = 'all'
-
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.expandtab = true
-vim.opt.autoindent = true
 vim.opt.smartindent = true
-
-
-vim.opt.spell = false
 
 vim.opt.list = true
 vim.opt.listchars = {
@@ -105,8 +95,6 @@ vim.opt.suffixes = {
   '.spot'
 }
 
-vim.opt.wildmenu = true
-
 vim.opt.wildignore = {
   '*/.hg/*',
   '*/.svn/*',
@@ -138,12 +126,8 @@ vim.opt.wildignore = {
 vim.opt.number = false
 vim.opt.relativenumber = false
 
-vim.opt.ruler = true
-
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
-vim.opt.incsearch = true
-vim.opt.hlsearch = true
 
 vim.opt.wrap = false
 
