@@ -1,6 +1,6 @@
 vim.pack.add({
   {
-    src = 'http://github.com/vpetro/vim-petro-colors',
+    src = 'https://github.com/vpetro/vim-petro-colors',
     name = 'petro-colors'
   },
   { src = 'https://github.com/catppuccin/nvim' },
@@ -23,7 +23,7 @@ vim.pack.add({
   { src = 'https://github.com/tpope/vim-commentary' },
 
   -- surrounding text objects
-          { src = 'https://github.com/tpope/vim-surround' },
+  { src = 'https://github.com/tpope/vim-surround' },
 
   -- distraction free mode
   { src = 'https://github.com/junegunn/goyo.vim' },
