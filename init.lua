@@ -540,6 +540,10 @@ vim.opt.runtimepath:prepend(vim.env.HOME .. "/code/petro/mentat")
 
 require("mentat").setup({
   provider = "anthropic",
+  slots = {
+    quick = { model = "claude-opus-5", thinking = "medium" },
+    big = { model = "claude-fable-5", thinking = "max" },
+  },
 })
 
 vim.g.mkdp_auto_close = 0
