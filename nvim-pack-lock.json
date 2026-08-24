@@ -37,7 +37,7 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects"
     },
     "petro-colors": {
-      "rev": "beb8ea0c197ecd3b404fe890ebec0176d6a3b977",
+      "rev": "9d22dfe670b26509f3a4e9c6188a94811750ee87",
       "src": "https://github.com/vpetro/vim-petro-colors"
     },
     "plenary.nvim": {
