@@ -40,6 +40,9 @@ vim.pack.add({
 
 })
 
+-- Default to the true-color theme; :Petro toggles back to the 256-color one.
+vim.cmd.colorscheme("petro-tc")
+
 vim.opt.swapfile = false
 vim.opt.background = "dark"
 vim.opt.termguicolors = true
@@ -306,8 +309,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   callback = petro_tc_fzf_overrides,
 })
 
--- Default to the true-color theme; :Petro toggles back to the 256-color one.
-vim.cmd.colorscheme("petro-tc")
 
 -- Toggle commands to compare the original 256-color theme against the
 -- true-color rewrite without ripping out either one.
