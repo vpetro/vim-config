@@ -1,15 +1,5 @@
--- TypeScript / JavaScript LSP via tsgo (the native Go port, aka
--- TypeScript 7 / @typescript/native-preview). Install with:
---   npm install -g @typescript/native-preview   (provides the `tsgo` binary)
---
--- tsgo is a preview build: hover, go-to-definition, references, diagnostics,
--- completion and signature help all work; some refactors/code-actions are
--- not yet at full parity with tsserver. To fall back to the stable, fully
--- featured server, install vtsls (`npm i -g @vtsls/language-server`), swap the
--- `cmd` below for `{ 'vtsls', '--stdio' }`, and rename this file to vtsls.lua
--- (and `vim.lsp.enable('vtsls')` in init.lua).
 return {
-  cmd = { 'tsgo', '--lsp', '--stdio' },
+  cmd = { 'tsc', '--lsp', '--stdio' },
   filetypes = {
     'javascript',
     'javascriptreact',

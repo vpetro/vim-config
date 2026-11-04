@@ -34,8 +34,6 @@ vim.pack.add({
   -- completion & snippets
   { src = 'https://github.com/saghen/blink.cmp', version = vim.version.range('1.*') },
 
-  { src = "https://github.com/iamcco/markdown-preview.nvim" },
-
   { src = "https://github.com/sindrets/diffview.nvim" }
 
 })
@@ -131,6 +129,8 @@ vim.opt.completeopt = { 'menu', 'menuone', 'noinsert' }
 vim.opt.shortmess:append('c')
 
 
+
+
 require('fzf-lua').setup({
   winopts = {
     split = 'botright 20new',
@@ -183,6 +183,16 @@ require('fzf-lua').setup({
     },
   },
 })
+
+require("fzf-lua").register_ui_select(function(opts, items)
+  if opts.kind == "mentat_model" or opts.kind == "mentat_thinking" then
+    return {
+      winopts = { split = false, width = 0.65, height = math.min(#items + 4, 18) },
+      previewer = false,
+    }
+  end
+  return {}
+end)
 
 require('catppuccin').setup({
   background = { dark = 'macchiato' }
@@ -322,9 +332,6 @@ vim.api.nvim_create_user_command("PetroTC", function()
   vim.cmd.colorscheme("petro-tc")
 end, { desc = "Use the true-color petro-tc theme" })
 
--- Dim neovim when tmux pane loses focus.
--- The FocusGained callback re-applies whatever colorscheme is currently
--- active so toggling via :PetroTC / :Petro survives a focus change.
 vim.api.nvim_create_autocmd("FocusLost", {
   callback = function()
     vim.api.nvim_set_hl(0, "Normal", { bg = "#1e2028" })
@@ -332,6 +339,7 @@ vim.api.nvim_create_autocmd("FocusLost", {
   end,
 })
 vim.api.nvim_create_autocmd("FocusGained", {
+  nested = true,
   callback = function()
     if vim.g.colors_name and vim.g.colors_name ~= "" then
       vim.cmd.colorscheme(vim.g.colors_name)
@@ -361,12 +369,43 @@ vim.keymap.set('n', '<leader>t', '<cmd>FzfLua git_files<cr>')
 vim.keymap.set('n', '<leader>f', '<cmd>FzfLua files<cr>')
 
 local function maximize_split()
-  vim.cmd('mksession! ~/.session.vim')
-  vim.cmd.only()
+  if vim.t.split_zoom then
+    return
+  end
+
+  local origin = {
+    tab = vim.api.nvim_get_current_tabpage(),
+    win = vim.api.nvim_get_current_win(),
+  }
+  vim.cmd('tab split')
+  vim.t.split_zoom = origin
+  if vim.wo.diff then
+    local scrollopt = vim.o.scrollopt
+    vim.cmd.diffoff()
+    vim.o.scrollopt = scrollopt
+  end
 end
 
-vim.keymap.set('n', '<C-w>u', ':source ~/.session.vim<cr>')
-vim.keymap.set('n', '<C-w>o', maximize_split)
+local function restore_split()
+  local origin = vim.t.split_zoom
+  if not origin then
+    return
+  end
+  if not vim.api.nvim_tabpage_is_valid(origin.tab) then
+    vim.t.split_zoom = nil
+    return
+  end
+
+  vim.cmd.tabclose()
+  if vim.api.nvim_win_is_valid(origin.win) then
+    vim.api.nvim_set_current_win(origin.win)
+  elseif vim.api.nvim_tabpage_is_valid(origin.tab) then
+    vim.api.nvim_set_current_tabpage(origin.tab)
+  end
+end
+
+vim.keymap.set('n', '<C-w>u', restore_split, { desc = 'Return from split zoom' })
+vim.keymap.set('n', '<C-w>o', maximize_split, { desc = 'Zoom split in a temporary tab' })
 
 vim.keymap.set('n', '<leader>gm', ':Gvdiffsplit main<CR>')
 vim.keymap.set('n', '<leader>gh', ':Gclog -- %<CR>')
@@ -395,7 +434,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
     vim.keymap.set('n', 'gu', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 
-    vim.keymap.set('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
     vim.keymap.set('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
 
     vim.keymap.set('n', '<leader>bb',
@@ -415,6 +453,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
       function()
         vim.cmd("vertical botright split")
         vim.lsp.buf.definition()
+        vim.cmd("normal! zz")
+      end,
+      opts
+    )
+    vim.keymap.set('n', 'gt',
+      function()
+        vim.cmd("vertical botright split")
+        vim.lsp.buf.type_definition()
         vim.cmd("normal! zz")
       end,
       opts
@@ -540,17 +586,137 @@ end)
 vim.opt.runtimepath:prepend(vim.env.HOME .. "/code/petro/mentat")
 
 require("mentat").setup({
-  provider = "anthropic",
+  provider = "openai",
+  model = "gpt-6-astra",
+  thinking = "medium",
   slots = {
-    quick = { model = "claude-opus-5", thinking = "medium" },
-    big = { model = "claude-fable-5", thinking = "max" },
+    quick = { model = "openai/gpt-6-astra", thinking = "medium" },
+    big = { model = "anthropic/claude-fable-5", thinking = "max" },
   },
 })
 
-vim.g.mkdp_auto_close = 0
-vim.g.mkdp_theme = "dark"
+local mdpreview = {}
+do
+  local assets = vim.fn.stdpath("config") .. "/pandoc"
+  local outdir = vim.fn.stdpath("cache") .. "/mdpreview"
+  local group = vim.api.nvim_create_augroup("mdpreview", {})
+  local renders = 0
 
-vim.keymap.set("n", "<leader>mp", "<cmd>MarkdownPreviewToggle<cr>", { desc = "Markdown preview" })
+  local function paths(bufnr)
+    local src = vim.api.nvim_buf_get_name(bufnr)
+    local name = vim.fn.fnamemodify(src, ":t")
+    if name == "" then
+      name = "untitled"
+    end
+    local key = vim.fn.fnamemodify(name, ":r"):gsub("[^%w%-_.]", "-") .. "-" .. vim.fn.sha256(src):sub(1, 8)
+    return src, name, outdir .. "/" .. key .. ".html", outdir .. "/" .. key .. ".stamp.js"
+  end
+
+  local function pandoc(bufnr, html, variables, on_done)
+    local src, name = paths(bufnr)
+    local cmd = {
+      "pandoc",
+      "--from", "gfm",
+      "--to", "html5",
+      "--standalone",
+      "--template", assets .. "/preview.html",
+      "--lua-filter", assets .. "/pv.lua",
+      "--metadata", "pagetitle=" .. name,
+      "--metadata", "srcdir=" .. vim.fn.fnamemodify(src, ":p:h"),
+      "--variable", "mermaid=" .. assets .. "/mermaid.min.js",
+      "--output", html,
+    }
+    for _, v in ipairs(variables) do
+      table.insert(cmd, "--variable")
+      table.insert(cmd, v)
+    end
+    vim.fn.mkdir(outdir, "p")
+    vim.system(cmd, { stdin = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false), text = true }, function(res)
+      vim.schedule(function()
+        if res.code ~= 0 then
+          vim.notify("mdpreview: " .. res.stderr, vim.log.levels.ERROR)
+          return
+        end
+        on_done()
+      end)
+    end)
+  end
+
+  local function render(bufnr, on_done)
+    local _, _, html, stampfile = paths(bufnr)
+    renders = renders + 1
+    local stamp = string.format("%d-%d", os.time(), renders)
+    pandoc(bufnr, html, { "stamp=" .. stamp, "stampfile=" .. stampfile }, function()
+      vim.fn.writefile({ 'window.__mdvStamp = "' .. stamp .. '";' }, stampfile)
+      if on_done then
+        on_done(html)
+      end
+    end)
+  end
+
+  local browsers = {
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+  }
+
+  function mdpreview.pdf(opts)
+    local browser
+    for _, path in ipairs(browsers) do
+      if vim.fn.executable(path) == 1 then
+        browser = path
+        break
+      end
+    end
+    if not browser then
+      vim.notify("mdpreview: no Chrome-based browser found for PDF output", vim.log.levels.ERROR)
+      return
+    end
+    local bufnr = vim.api.nvim_get_current_buf()
+    local _, name, html = paths(bufnr)
+    local print_html = html:gsub("%.html$", ".print.html")
+    local pdf = opts.args ~= "" and vim.fn.fnamemodify(opts.args, ":p")
+      or vim.fn.fnamemodify("~/Downloads/" .. vim.fn.fnamemodify(name, ":r") .. ".pdf", ":p")
+    pandoc(bufnr, print_html, { "theme=light" }, function()
+      vim.system({
+        browser,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-pdf-header-footer",
+        "--virtual-time-budget=6000",
+        "--print-to-pdf=" .. pdf,
+        "file://" .. print_html,
+      }, { text = true }, function(res)
+        vim.schedule(function()
+          if res.code ~= 0 or vim.fn.filereadable(pdf) == 0 then
+            vim.notify("mdpreview: pdf failed: " .. res.stderr, vim.log.levels.ERROR)
+            return
+          end
+          vim.notify("mdpreview: wrote " .. pdf)
+          vim.ui.open(pdf)
+        end)
+      end)
+    end)
+  end
+
+  function mdpreview.open()
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
+    vim.api.nvim_create_autocmd("BufWritePost", {
+      group = group,
+      buffer = bufnr,
+      callback = function()
+        render(bufnr)
+      end,
+    })
+    render(bufnr, vim.ui.open)
+  end
+end
+
+vim.api.nvim_create_user_command("MarkdownPreview", mdpreview.open, {})
+vim.api.nvim_create_user_command("MarkdownPdf", mdpreview.pdf, { nargs = "?", complete = "file" })
+vim.keymap.set("n", "<leader>mp", mdpreview.open, { desc = "Markdown preview" })
 
 -- Toggle a markdown checkbox on the given line, cycling on repeat press:
 --   "buy milk"     -> "- [ ] buy milk"   (plain text -> checkbox item)
@@ -575,25 +741,94 @@ local function md_toggle_checkbox(lnum)
   vim.fn.setline(lnum, line)
 end
 
--- Open a new line below and drop in an HTML comment tagged "PV:" for
--- annotating docs. The comment is invisible in rendered markdown but trivial
--- to grep ("PV:"). Lands you in insert mode right after the tag:
---   <!-- PV: | -->
 local function md_insert_pv_comment(lnum)
-  local indent = vim.fn.getline(lnum):match("^(%s*)") or ""
+  local line = vim.fn.getline(lnum)
+  local indent = line:match("^(%s*)") or ""
+  local marker = line:match("^%s*([-*+]%s+)") or line:match("^%s*(%d+[.)]%s+)")
+  if marker then
+    indent = indent .. string.rep(" ", #marker)
+  end
   local prefix = indent .. "<!-- PV: "
   vim.fn.append(lnum, prefix .. " -->")
   vim.api.nvim_win_set_cursor(0, { lnum + 1, #prefix })
   vim.cmd("startinsert")
 end
 
--- Nicer reading/editing defaults for markdown buffers.
+local function md_note_tag_depth(line)
+  local depth, rest = 0, line
+  while true do
+    local more = rest:match("^%s*>(.*)$")
+    if not more then
+      break
+    end
+    depth, rest = depth + 1, more
+  end
+  if rest:match("^%s*%u+:") then
+    return depth
+  end
+end
+
+local function md_insert_pv_reply(lnum)
+  local open
+  for l = lnum, 1, -1 do
+    local line = vim.fn.getline(l)
+    if l < lnum and line:find("-->", 1, true) then
+      break
+    end
+    if line:find("<!--", 1, true) then
+      open = l
+      break
+    end
+  end
+  if not open then
+    return md_insert_pv_comment(lnum)
+  end
+  local close = open
+  while close < vim.fn.line("$") and not vim.fn.getline(close):find("-->", 1, true) do
+    close = close + 1
+  end
+  local depth = 0
+  if lnum ~= close then
+    for l = lnum, open + 1, -1 do
+      local d = md_note_tag_depth(vim.fn.getline(l))
+      if d then
+        depth = d
+        break
+      end
+    end
+  end
+  local base = vim.fn.getline(open):match("^(%s*)") or ""
+  local before = vim.fn.getline(close):match("^(.-)%s*%-%->")
+  if before and before:match("%S") then
+    vim.fn.setline(close, before)
+    vim.fn.append(close, base .. "-->")
+    close = close + 1
+  end
+  local at = close
+  for l = lnum + 1, close - 1 do
+    local d = md_note_tag_depth(vim.fn.getline(l))
+    if d and d <= depth then
+      at = l
+      break
+    end
+  end
+  local reply = base .. string.rep(">", depth + 1) .. " PV: "
+  vim.fn.append(at - 1, reply)
+  vim.api.nvim_win_set_cursor(0, { at, #reply })
+  vim.cmd("startinsert!")
+end
+
+require("review_notes").setup()
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "markdown",
   callback = function()
     vim.opt_local.wrap = true        -- prose: soft-wrap long lines
     vim.opt_local.linebreak = true   -- ...breaking at word boundaries
     vim.opt_local.breakindent = true -- wrapped lines keep list indentation
+
+    vim.opt_local.formatoptions:append("r")
+    vim.opt_local.comments = "n:>"
 
     vim.keymap.set("n", "<leader>x", function()
       md_toggle_checkbox(vim.fn.line("."))
@@ -608,12 +843,22 @@ vim.api.nvim_create_autocmd("FileType", {
 
     vim.keymap.set("n", "<leader>c", function()
       md_insert_pv_comment(vim.fn.line("."))
-    end, { buffer = true, desc = "Insert PV: HTML comment" })
+    end, { buffer = true, desc = "Insert PV: review note" })
+
+    vim.keymap.set("n", "<leader>r", function()
+      md_insert_pv_reply(vim.fn.line("."))
+    end, { buffer = true, desc = "Reply to the review note under the cursor" })
+
   end,
 })
 
+local diff_review = require("diff_review")
+diff_review.setup()
+
 require("diffview").setup({
+  use_icons = false,
   merge_tool = {
-    layout = "diff3_mixed",  -- or "diff3_horizontal", "diff3_plain"
+    layout = "diff3_mixed",
   },
+  keymaps = { view = diff_review.keymaps() },
 })
