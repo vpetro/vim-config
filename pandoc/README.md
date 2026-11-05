@@ -143,8 +143,8 @@ front of its label. Hosts covered: GitHub, Linear, Google Docs, Sheets and
 Slides (told apart by path), Drive, Meet, Calendar, Gmail, Google Cloud, Slack,
 Jira and Confluence (by path on `atlassian.net`), Datadog, Figma, YouTube,
 arXiv, Reddit, Wikipedia, X, npm, PyPI, Stack Overflow, Notion, Chromatic,
-Storybook, and Yahoo (`*.yahoo.com` and `*.yahooinc.com`). Links to any other
-host have no icon. `AGENTS.md` describes how to add a service.
+Storybook, and the public Yahoo domains `*.yahoo.com` and `*.yahooinc.com`.
+Other hosts have no icon. See `AGENTS.md` for instructions on adding a service.
 
 ## Diagrams
 
@@ -168,9 +168,16 @@ GitHub task lists, tables with zebra rows, GitHub alerts (`> [!NOTE]` and the
 other four), footnotes, fenced code with syntax highlighting in the editor
 palette, and images with paths relative to the markdown file.
 
-YAML frontmatter is not shown as text. A `title` in it becomes the document
-heading, with `id`, `status`, and `date` in a small line under it when they
-are present.
+YAML frontmatter is hidden. The renderer uses its `title` as the document
+heading and displays any `id`, `status`, and `date` values below it.
+
+## Third-party notices
+
+`mermaid.min.js` is the unmodified Mermaid 11.17.2 browser bundle. Its
+copyright and license notices, including notices for bundled dependencies,
+are in [the Mermaid license file](mermaid.min.js.LICENSE.txt). Keep that file
+with the bundle when copying or redistributing it. DOMPurify is included
+under its Apache-2.0 option.
 
 ## Files
 

@@ -191,9 +191,9 @@ the smallest size that still reads as body text rather than a caption.
 
 ### Collapsed threads and hidden notes
 
-The first threaded render of a real document showed the cost of notes under
-the text: a 35-line thread under an 8-line paragraph, and a section that was
-mostly commentary. The margin never had that problem because the text
+Long threads can overwhelm the text they refer to. In an early render, a
+35-line thread followed an 8-line paragraph, making the section mostly
+commentary. The margin never had that problem because the text
 stayed continuous. The answer is not a return to the margin (a thread does
 not fit one) but control over what shows.
 
@@ -233,10 +233,10 @@ and `p`.
   clearing `data-processed`, then `mermaid.initialize` and `mermaid.run`. The
   source is stashed once at load.
 - `withCurve()` prepends `%%{init: {"flowchart": {"curve": ...}}}%%` per
-  diagram: `bumpX` for `LR`/`RL`, `bumpY` otherwise. Curve is a global config
-  in Mermaid, and most of the flowcharts this renders are `LR`, so the
-  directive is the only way to get direction-appropriate curves. Sources that
-  begin with `---` (frontmatter) or `%%{` are left untouched. `basis` was
+  diagram: `bumpX` for `LR`/`RL`, `bumpY` otherwise. Mermaid sets the curve
+  at the diagram level. This directive selects the curve for each diagram's
+  direction. Sources that begin with `---` (frontmatter) or `%%{` are left
+  untouched. `basis` was
   rejected for its overshoot, `stepAfter` for the jogs dagre produces.
 - `look: "neo"` was tried and rejected: it adds drop shadows to every node and
   cluster (glow in dark mode), which is decoration without information.
@@ -386,9 +386,9 @@ two-paragraph reply) both collapsed and expanded, the page with notes
 hidden, the list-item thread under "Notes on other block types", an `LR`
 and a `TB` flowchart, and the "Wide content" section, where notes sit under
 a code block and under a bleeding diagram: the notes must stay in the text
-column and the diagram must keep its bleed. Add anything new to
-`sample.md`; it is the only fixture. Headless Chrome
-starts with empty `sessionStorage`, so every thread screenshots collapsed;
+column and the diagram must keep its bleed. Add new test cases to
+`sample.md`, the shared fixture. Headless Chrome starts with empty
+`sessionStorage`, so every thread is collapsed in the initial screenshot;
 to see them open, inject a click on `.toolbar .fold` with `--dump-dom` or
 temporarily set the default in `setOpen`.
 
@@ -449,8 +449,8 @@ fixture.
   sentence, and put the thread under the paragraph. That needs a pre-pass
   over the raw text before pandoc, because pandoc splits the paragraph at
   the comment before any filter runs.
-- The link-text rule (label names the target, never the URL) is in Petro's
-  global `AGENTS.md` and `voice.md`.
+- Follow Petro's global `AGENTS.md` and `voice.md` for link labels: name the
+  target rather than repeating its URL.
 - The mono stack is the system default. PragmataPro and JetBrains Mono are
   installed if a change is wanted.
 
